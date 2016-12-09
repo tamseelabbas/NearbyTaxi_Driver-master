@@ -21,6 +21,12 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Toast;
 
+import com.akexorcist.googledirection.DirectionCallback;
+import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.TransportMode;
+import com.akexorcist.googledirection.constant.Unit;
+import com.akexorcist.googledirection.model.Direction;
+import com.akexorcist.googledirection.util.DirectionConverter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -76,7 +82,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     static private AlertDialog.Builder builder;
     private DatabaseReference Database;
     private ValueEventListener v;
-
+    private Polyline polyline;
+private boolean foo=true;
 
 private void abc(){
 
@@ -113,6 +120,8 @@ private void abc(){
                                 p=null;
                                 Database.removeEventListener(v);
 
+                                foo=true;
+                                polyline.remove();
 
                             }
 
@@ -129,9 +138,45 @@ private void abc(){
                                         .snippet("This is passenger location"));
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(passenger.x, passenger.y), defaultZoom));
                                 p=passenger;
-                            }
-                        }
 
+
+                                String serverKey = "AIzaSyD4Bt_3NP9Awl9dJ2DkH-K6aAFtJrNZsIM";
+                                final LatLng origin = new LatLng(d.x, d.y);
+
+                                final LatLng destination = new LatLng(p.x, p.y);
+
+if(foo) {
+    GoogleDirection.withServerKey(serverKey)
+            .from(origin)
+            .to(destination)
+            .transportMode(TransportMode.WALKING).unit(Unit.METRIC).alternativeRoute(true)
+            .execute(new DirectionCallback() {
+                @Override
+                public void onDirectionSuccess(Direction direction, String rawBody) {
+                    // Do something here
+                    if (direction.isOK()) {
+
+
+                        ArrayList<LatLng> directionPositionList = direction.getRouteList().get(0).getLegList().get(0).getDirectionPoint();
+                        polyline=mMap.addPolyline(DirectionConverter.createPolyline(MapsActivity.this, directionPositionList, 5, Color.RED));
+
+
+                    }
+                }
+
+                @Override
+                public void onDirectionFailure(Throwable t) {
+                    // Do something here
+
+                    Toast.makeText(MapsActivity.this, "fail", Toast.LENGTH_SHORT).show();
+                }
+            });
+    foo=false;
+}
+
+                            }
+
+                        }
 
 
 
@@ -146,6 +191,9 @@ private void abc(){
 
 
                 Toast.makeText(MapsActivity.this,"Request Accepted",Toast.LENGTH_SHORT).show();
+
+
+
 
 
             }
