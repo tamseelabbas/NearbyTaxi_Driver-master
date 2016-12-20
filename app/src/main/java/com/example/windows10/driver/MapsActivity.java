@@ -65,6 +65,8 @@ import java.util.Map;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,LocationListener,GoogleMap.OnInfoWindowClickListener  {
 
+    private LatLng destinationLocation;
+    private Marker destinationMarker;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -76,8 +78,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DatabaseReference mDatabase;
     private String Uid;
     private String path="users/driver/";
-    private Marker m;
-    private Passenger p;
+    public static Marker m;
+    public static Passenger p;
     static private AlertDialog dialog;
     static private AlertDialog.Builder builder;
     private DatabaseReference Database;
@@ -110,7 +112,11 @@ private void abc(){
                         // This method is called once with the initial value and again
                         // whenever data at this location is updated.
 
+
+
                         Passenger passenger = dataSnapshot.getValue(Passenger.class);
+
+
 
                         if(passenger!=null) {
                             if(passenger.status==0){
@@ -131,12 +137,12 @@ private void abc(){
                                 }
 
                                 m = mMap.addMarker(new MarkerOptions()
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                                         .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
                                         .position(new LatLng(passenger.x, passenger.y))
                                         .title("Passenger")
                                         .snippet("This is passenger location"));
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(passenger.x, passenger.y), defaultZoom));
+//                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(passenger.x, passenger.y), defaultZoom));
                                 p=passenger;
 
 
@@ -277,6 +283,18 @@ if(foo) {
                         dialog.dismiss();
 
                     }
+                    else if((d.r_status==1 && dataSnapshot.getValue(Driver.class).r_status==-1)) {
+                        Database.removeEventListener(v);
+                        if(m!=null)
+                        m.remove();
+                        p=null;
+
+                        polyline.remove();
+
+
+                    }
+
+
                 }
 
 
@@ -289,6 +307,63 @@ if(foo) {
             }
         });
     }
+    private void setDestinationLocationListner(){
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                if(destinationLocation!=null){
+
+                    destinationMarker.remove();
+                    polyline.remove();
+
+
+                }
+                destinationMarker=mMap.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                        .anchor(0.5f, 0.5f) // Anchors the marker on the bottom left
+                        .position(latLng)
+                        .title("Destination Location")
+                        .snippet("This is destination location"));
+                destinationLocation=latLng;
+                String serverKey = "AIzaSyAgBqU-Rmq-_qL-VFFO8arr9u_I-bUHyIE";
+                final LatLng origin = new LatLng(d.x,d.y);
+
+                final LatLng destination = new LatLng(latLng.latitude,latLng.longitude);
+
+                GoogleDirection.withServerKey(serverKey)
+                        .from(origin)
+                        .to(destination)
+                        .transportMode(TransportMode.WALKING).unit(Unit.METRIC).alternativeRoute(true)
+                        .execute(new DirectionCallback() {
+                            @Override
+                            public void onDirectionSuccess(Direction direction, String rawBody) {
+                                // Do something here
+                                if (direction.isOK()) {
+
+
+                                    ArrayList<LatLng> directionPositionList = direction.getRouteList().get(0).getLegList().get(0).getDirectionPoint();
+                                    polyline=mMap.addPolyline(DirectionConverter.createPolyline(MapsActivity.this, directionPositionList, 5, Color.RED));
+
+
+                                }
+                            }
+
+                            @Override
+                            public void onDirectionFailure(Throwable t) {
+                                // Do something here
+
+                                Toast.makeText(MapsActivity.this, "fail", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+
+
+                Toast.makeText(MapsActivity.this,"Destination location set",Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
 
     private void SetOnInfoWindowListener() {
         mMap.setOnInfoWindowClickListener(this);
@@ -298,6 +373,13 @@ if(foo) {
         if(marker.equals(myLocation)){
             Intent markerIntent=new Intent(this, MyDetail.class);
             startActivity(markerIntent);
+        }
+
+        else if(marker.equals(m)){
+
+            Intent markerIntent=new Intent(this, PassengerOptions.class);
+            startActivity(markerIntent);
+
         }
 
 //        else{
@@ -326,7 +408,7 @@ if(foo) {
 
     }
 
-    private void removePassengerRequest() {
+    public static void removePassengerRequest() {
         if(p!=null){
 
             String pathh = "users/driver/" + d.key + "/passengerKey";
@@ -401,13 +483,7 @@ if(foo) {
         EnableCurrentLocationIcon();
         RequestHandler();
         SetOnInfoWindowListener();
-        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener(){
-
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-
-            }
-        });
+        setDestinationLocationListner();
         if(mGoogleApiClient!=null && mLastLocation==null) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -446,7 +522,7 @@ if(foo) {
             if(myLocation!=null){
                 myLocation.remove();
             }
-            myLocation=mMap.addMarker(new MarkerOptions().position(l1).title("Marker in your locatioon"));
+            myLocation=mMap.addMarker(new MarkerOptions().position(l1).title("Marker in your locatioon").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
             if(moveToCurrentLocation==false) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(l1, defaultZoom));
                 moveToCurrentLocation=true;
