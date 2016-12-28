@@ -82,9 +82,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static Passenger p;
     static private AlertDialog dialog;
     static private AlertDialog.Builder builder;
-    private DatabaseReference Database;
-    private ValueEventListener v;
-    private Polyline polyline;
+    static public DatabaseReference Database;
+    static public ValueEventListener v;
+    static public Polyline polyline;
 private boolean foo=true;
 
 private void abc(){
@@ -270,6 +270,7 @@ if(foo) {
                         //passenger recive request
 
 
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -283,16 +284,25 @@ if(foo) {
                         dialog.dismiss();
 
                     }
-                    else if((d.r_status==1 && dataSnapshot.getValue(Driver.class).r_status==-1)) {
-                        Database.removeEventListener(v);
-                        if(m!=null)
-                        m.remove();
-                        p=null;
+                    else if(d.r_status==1 && dataSnapshot.getValue(Driver.class).r_status==-1) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(Database!=null || v!=null)
+                                Database.removeEventListener(v);
+                                if(m!=null)
+                                    m.remove();
+                                p=null;
 
-                        polyline.remove();
+                                if(polyline!=null)
+                                polyline.remove();
+                            }
+                        });
+
 
 
                     }
+
 
 
                 }
@@ -399,7 +409,7 @@ if(foo) {
 
 
         super.onDestroy();
-        Toast.makeText(this,"ondistroy",Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this,"ondistroy",Toast.LENGTH_SHORT).show();
 
 
         removePassengerRequest();
@@ -445,7 +455,7 @@ if(foo) {
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
-        Toast.makeText(this,"onstopcalled",Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this,"onstopcalled",Toast.LENGTH_SHORT).show();
 
     }
 

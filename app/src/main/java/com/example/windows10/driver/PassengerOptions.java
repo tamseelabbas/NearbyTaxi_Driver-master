@@ -26,6 +26,14 @@ public class PassengerOptions extends AppCompatActivity {
     public void onClickCancelRequest(View view) {
 
         MapsActivity.removePassengerRequest();
+        if(MapsActivity.Database!=null || MapsActivity.v!=null)
+            MapsActivity.Database.removeEventListener(MapsActivity.v);
+        if(MapsActivity.m!=null)
+            MapsActivity.m.remove();
+        MapsActivity.p=null;
+
+        if(MapsActivity.polyline!=null)
+            MapsActivity.polyline.remove();
 
         finish();
     }

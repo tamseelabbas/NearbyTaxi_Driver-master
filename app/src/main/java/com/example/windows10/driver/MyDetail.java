@@ -22,17 +22,17 @@ public class MyDetail extends AppCompatActivity {
 
 
         if(MapsActivity.d!=null) {
-            name.setText(MapsActivity.d.name);
-            age.setText(Long.toString(MapsActivity.d.age));
-            contactNumber.setText(MapsActivity.d.contactNumber);
+            name.setText(name.getText()+MapsActivity.d.name);
+            age.setText(age.getText()+Long.toString(MapsActivity.d.age));
+            contactNumber.setText(contactNumber.getText()+MapsActivity.d.contactNumber);
 
-            cnic.setText(MapsActivity.d.cnic);
+            cnic.setText(cnic.getText()+MapsActivity.d.cnic);
         }
     }
 
     @Override
     protected void onDestroy() {
-        Toast.makeText(this,"ondistroymydetail",Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this,"ondistroymydetail",Toast.LENGTH_SHORT).show();
         super.onDestroy();
     }
 }

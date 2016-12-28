@@ -10,32 +10,43 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#5d4037"
+    android:backgroundTint="#455a64"
     tools:context="com.example.windows10.driver.PassengerOptions">
 
 
 
 
     <Button
+        style="@style/Button"
+
+        android:background="@drawable/button_selector"
         android:text="Passenger Detail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:id="@+id/passengerDetail"
         android:onClick="onClickPassengerDetail"/>
 
     <Button
+        style="@style/Button"
+
+        android:background="@drawable/button_selector"
         android:text="Call Passenger"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:id="@+id/callPassenger"
         android:onClick="onClickCallPassenger"/>
     <Button
+        style="@style/Button"
+
+        android:background="@drawable/button_selector"
         android:text="Cancell request"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:id="@+id/cancelRequest"
